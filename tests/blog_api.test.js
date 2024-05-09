@@ -29,14 +29,14 @@ test('all blogs are returned', async () => {
   assert.strictEqual(response.body.length, helper.initialBlogs.length);
 });
 
-test.only('unique identifier property named as id', async () => {
+test('unique identifier property named as id', async () => {
   const response = await api.get('/api/blogs');
 
   const ids = response.body.map((obj) => obj.id);
   assert.strictEqual(ids.length, helper.initialBlogs.length);
 });
 
-test.only('a valid blog can be added', async () => {
+test('a valid blog can be added', async () => {
   const newBlog = {
     title: 'title3',
     author: 'author3',
@@ -55,6 +55,31 @@ test.only('a valid blog can be added', async () => {
 
   const titles = blogsAtEnd.map((blog) => blog.title);
   assert(titles.includes('title3'));
+});
+
+test('deletion of a note', async () => {
+  const blogsAtStart = await helper.blogsInDB();
+  const blogToDelete = blogsAtStart[0];
+
+  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+
+  const blogsAtEnd = await helper.blogsInDB();
+
+  assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1);
+
+  const titles = blogsAtEnd.map((b) => b.title);
+  assert(!titles.includes(blogToDelete.title));
+});
+
+test('update a note', async () => {
+  const blogsAtStart = await helper.blogsInDB();
+  const blogToUpdate = { ...blogsAtStart[0], likes: blogsAtStart[0].likes + 1 };
+  const response = await api
+    .put(`/api/blogs/${blogToUpdate.id}`)
+    .send(blogToUpdate)
+    .expect(200);
+
+  assert.deepStrictEqual(response.body, blogToUpdate);
 });
 
 after(async () => {
