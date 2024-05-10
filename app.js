@@ -7,6 +7,8 @@ const app = express();
 const cors = require('cors');
 const mongoose = require('mongoose');
 const blogRouter = require('./controllers/blog');
+const usersRouter = require('./controllers/user');
+const loginRouter = require('./controllers/login');
 
 logger.info('connecting to', config.MONGODB_URI);
 
@@ -23,8 +25,11 @@ app.use(cors());
 app.use(express.static('dist'));
 app.use(express.json());
 app.use(middleware.requestLogger);
+app.use(middleware.tokenExtractor);
 
 app.use('/api/blogs', blogRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/login', loginRouter);
 
 app.use(middleware.unknownEndPoint);
 app.use(middleware.errorHandler);
